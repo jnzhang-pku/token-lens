@@ -1,0 +1,189 @@
+:root {
+  color-scheme: dark;
+  --text: rgba(250, 252, 255, 0.96);
+  --muted: rgba(250, 252, 255, 0.48);
+  --subtle: rgba(250, 252, 255, 0.66);
+  --panel-border: rgba(255, 255, 255, 0.10);
+  --divider: rgba(255, 255, 255, 0.08);
+  --violet: #8b6cff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+html,
+body {
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+  color: var(--text);
+  font-family:
+    "SF Pro Text",
+    "SF Pro Display",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.app-root {
+  position: relative;
+  width: 420px;
+  height: 190px;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+}
+
+.hover-zone {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 180px;
+  height: 48px;
+  transform: translateX(-50%);
+  z-index: 20;
+}
+
+.handle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 84px;
+  height: 10px;
+  transform: translateX(-50%);
+  border: 1px solid var(--panel-border);
+  border-top: none;
+  border-radius: 0 0 999px 999px;
+  background: rgba(5, 7, 11, 0.98);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.handle-mark {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--violet);
+  box-shadow: 0 0 10px rgba(139, 108, 255, 0.7);
+}
+
+.panel {
+  position: absolute;
+  top: 18px;
+  left: 0;
+  width: 420px;
+  height: 168px;
+  overflow: hidden;
+  padding: 18px 20px;
+  border: 1px solid var(--panel-border);
+  border-radius: 24px;
+  background: #06080d;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 24px 80px rgba(0, 0, 0, 0.75);
+  transform-origin: top center;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 16px;
+  gap: 16px;
+}
+
+.panel-title {
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  line-height: 1;
+}
+
+.panel-model {
+  color: rgba(250, 252, 255, 0.72);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 23px;
+  height: 70px;
+}
+
+.metric-column {
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 18px;
+}
+
+.metric-column:first-child {
+  padding-left: 0;
+}
+
+.metric-column:last-child {
+  padding-right: 0;
+}
+
+.metric-column:not(:first-child) {
+  border-left: 1px solid var(--divider);
+}
+
+.metric-label {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.metric-value {
+  margin-top: 9px;
+  color: var(--text);
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: 0;
+  line-height: 0.95;
+  white-space: nowrap;
+}
+
+.metric-cost {
+  margin-top: 9px;
+  color: var(--subtle);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  color: rgba(250, 252, 255, 0.34);
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: 0.15em;
+  line-height: 1;
+}

@@ -1,0 +1,37 @@
+{
+  "name": "token-lens",
+  "version": "0.1.0",
+  "description": "Compact macOS notch-style token monitor for local Codex usage",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack:mac": "electron-builder --mac dir",
+    "dist:mac": "electron-builder --mac dmg"
+  },
+  "build": {
+    "appId": "com.john.tokenlens",
+    "productName": "Token Lens",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "dmg"
+      ]
+    },
+    "dmg": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "title": "${productName} ${version}"
+    }
+  },
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "^26.8.1"
+  }
+}

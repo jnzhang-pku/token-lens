@@ -1,0 +1,69 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="desktop" x1="0" y1="0" x2="1280" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#151d14"/>
+      <stop offset="0.45" stop-color="#25231e"/>
+      <stop offset="1" stop-color="#10151c"/>
+    </linearGradient>
+    <linearGradient id="browser" x1="0" y1="76" x2="1280" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#102010"/>
+      <stop offset="1" stop-color="#192018"/>
+    </linearGradient>
+    <filter id="panelShadow" x="134" y="90" width="1012" height="478" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="28"/>
+      <feGaussianBlur stdDeviation="42"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.72 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="drop"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="drop" result="shape"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="720" rx="28" fill="url(#desktop)"/>
+  <rect width="1280" height="76" fill="#20281E" fill-opacity="0.92"/>
+  <text x="34" y="48" fill="#F2F4EF" font-family="Arial, sans-serif" font-size="24" font-weight="700">Token Lens</text>
+  <text x="188" y="48" fill="#E7EBE2" font-family="Arial, sans-serif" font-size="19" font-weight="600">File</text>
+  <text x="252" y="48" fill="#E7EBE2" font-family="Arial, sans-serif" font-size="19" font-weight="600">Edit</text>
+  <text x="318" y="48" fill="#E7EBE2" font-family="Arial, sans-serif" font-size="19" font-weight="600">View</text>
+
+  <rect y="76" width="1280" height="128" fill="url(#browser)"/>
+  <rect x="72" y="110" width="174" height="36" rx="9" fill="#0F1712" fill-opacity="0.9"/>
+  <rect x="270" y="110" width="174" height="36" rx="9" fill="#0F1712" fill-opacity="0.9"/>
+  <rect x="468" y="110" width="174" height="36" rx="9" fill="#0F1712" fill-opacity="0.9"/>
+  <rect x="666" y="110" width="174" height="36" rx="9" fill="#0F1712" fill-opacity="0.9"/>
+  <rect x="864" y="110" width="174" height="36" rx="9" fill="#0F1712" fill-opacity="0.9"/>
+
+  <path d="M514 24H766C766 47.7482 746.748 67 723 67H557C533.252 67 514 47.7482 514 24Z" fill="#05070B" stroke="white" stroke-opacity="0.1"/>
+  <circle cx="640" cy="48" r="5" fill="#8B6CFF"/>
+
+  <g filter="url(#panelShadow)">
+    <rect x="220" y="148" width="840" height="336" rx="48" fill="#06080D"/>
+    <rect x="221" y="149" width="838" height="334" rx="47" stroke="#FFFFFF" stroke-opacity="0.1" stroke-width="2"/>
+
+    <text x="270" y="214" fill="#F9FAFF" font-family="Arial, sans-serif" font-size="26" font-weight="700" letter-spacing="9">TOKEN LENS</text>
+    <text x="1010" y="214" text-anchor="end" fill="#AEB2BC" font-family="Arial, sans-serif" font-size="24" font-weight="700">ALL MODELS</text>
+
+    <line x1="516" y1="276" x2="516" y2="406" stroke="#FFFFFF" stroke-opacity="0.09" stroke-width="2"/>
+    <line x1="764" y1="276" x2="764" y2="406" stroke="#FFFFFF" stroke-opacity="0.09" stroke-width="2"/>
+
+    <text x="270" y="296" fill="#8E929D" font-family="Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="7">TODAY</text>
+    <text x="270" y="367" fill="#F9FAFF" font-family="Arial, sans-serif" font-size="66" font-weight="700">53.85M</text>
+    <text x="270" y="420" fill="#A8ACB5" font-family="Arial, sans-serif" font-size="32" font-weight="500">$134.07</text>
+
+    <text x="564" y="296" fill="#8E929D" font-family="Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="7">7 DAYS</text>
+    <text x="564" y="367" fill="#F9FAFF" font-family="Arial, sans-serif" font-size="66" font-weight="700">279M</text>
+    <text x="564" y="420" fill="#A8ACB5" font-family="Arial, sans-serif" font-size="32" font-weight="500">$459.79</text>
+
+    <text x="812" y="296" fill="#8E929D" font-family="Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="7">30 DAYS</text>
+    <text x="812" y="367" fill="#F9FAFF" font-family="Arial, sans-serif" font-size="66" font-weight="700">1.53B</text>
+    <text x="812" y="420" fill="#A8ACB5" font-family="Arial, sans-serif" font-size="32" font-weight="500">$2,348.13</text>
+
+    <text x="270" y="456" fill="#6F7480" font-family="Arial, sans-serif" font-size="17" font-weight="800" letter-spacing="5">API COST ESTIMATE</text>
+    <text x="1010" y="456" text-anchor="end" fill="#6F7480" font-family="Arial, sans-serif" font-size="17" font-weight="800" letter-spacing="5">UPDATED NOW</text>
+  </g>
+
+  <text x="220" y="570" fill="#F5F6FA" font-family="Arial, sans-serif" font-size="36" font-weight="800">A small macOS panel for local Codex token usage.</text>
+  <text x="220" y="616" fill="#C7CBD4" font-family="Arial, sans-serif" font-size="21" font-weight="500">Aggregates all models and estimates cached-token-aware API cost from local Codex logs.</text>
+</svg>

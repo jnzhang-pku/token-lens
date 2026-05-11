@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Token Lens</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main id="app-root" class="app-root">
+      <div class="hover-zone" aria-hidden="true"></div>
+
+      <div class="handle" aria-hidden="true">
+        <div class="handle-mark"></div>
+      </div>
+
+      <section class="panel" aria-label="Token usage summary">
+        <header class="panel-header">
+          <span class="panel-title">TOKEN LENS</span>
+          <span class="header-actions">
+            <span class="panel-model">ALL MODELS</span>
+            <button id="refresh-button" class="refresh-button" type="button" aria-label="Refresh usage">↻</button>
+          </span>
+        </header>
+
+        <section class="metrics-row">
+          <div class="metric-column">
+            <div class="metric-label">TODAY</div>
+            <div class="metric-value" data-range="today" data-field="tokens">--</div>
+            <div class="metric-cost" data-range="today" data-field="cost">$--</div>
+          </div>
+          <div class="metric-column">
+            <div class="metric-label">7 DAYS</div>
+            <div class="metric-value" data-range="7d" data-field="tokens">--</div>
+            <div class="metric-cost" data-range="7d" data-field="cost">$--</div>
+          </div>
+          <div class="metric-column">
+            <div class="metric-label">30 DAYS</div>
+            <div class="metric-value" data-range="30d" data-field="tokens">--</div>
+            <div class="metric-cost" data-range="30d" data-field="cost">$--</div>
+          </div>
+        </section>
+
+        <footer class="panel-footer">
+          <span>API COST ESTIMATE</span>
+          <span id="update-status">UPDATED NOW</span>
+        </footer>
+      </section>
+    </main>
+    <script type="module" src="./renderer.mjs"></script>
+  </body>
+</html>
