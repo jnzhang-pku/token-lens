@@ -1,21 +1,10 @@
-const fs = require("fs");
-const os = require("os");
-const path = require("path");
+const codexProvider = require("./providers/codex");
 
-const SESSIONS_ROOT = path.join(os.homedir(), ".codex", "sessions");
+const PROVIDERS = [codexProvider];
+
 const DEFAULT_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-const PRICING_BY_MODEL = [
-  { test: (model) => model.includes("5.5"), rates: { input: 5, cached: 0.5, output: 30 } },
-  { test: (model) => model.includes("5-codex"), rates: { input: 1.25, cached: 0.125, output: 10 } },
-  { test: (model) => model.includes("5.4-mini"), rates: { input: 0.75, cached: 0.075, output: 4.5 } },
-  { test: (model) => model.includes("5.4"), rates: { input: 2.5, cached: 0.25, output: 15 } },
-  { test: (model) => model.includes("5.3-codex"), rates: { input: 1.75, cached: 0.175, output: 14 } },
-  { test: (model) => model.includes("5.2"), rates: { input: 1.75, cached: 0.175, output: 14 } },
-  { test: () => true, rates: { input: 2.5, cached: 0.25, output: 15 } }
-];
 
 const dateFormatters = new Map();
-const datePartFormatters = new Map();
 const hourFormatters = new Map();
 
 function getDateFormatter(timezone) {
@@ -31,25 +20,6 @@ function getDateFormatter(timezone) {
     );
   }
   return dateFormatters.get(timezone);
-}
-
-function getDatePartFormatter(timezone) {
-  if (!datePartFormatters.has(timezone)) {
-    datePartFormatters.set(
-      timezone,
-      new Intl.DateTimeFormat("en-US", {
-        timeZone: timezone,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false
-      })
-    );
-  }
-  return datePartFormatters.get(timezone);
 }
 
 function getHourFormatter(timezone) {
@@ -85,88 +55,12 @@ function getHourBucket(date, timezone) {
   return Math.max(0, Math.min(7, Math.floor(hour / 3)));
 }
 
-function listSessionFiles(rootDir) {
-  const files = [];
-
-  if (!fs.existsSync(rootDir)) return files;
-
-  const stack = [rootDir];
-  while (stack.length > 0) {
-    const current = stack.pop();
-    let entries = [];
-    try {
-      entries = fs.readdirSync(current, { withFileTypes: true });
-    } catch {
-      continue;
-    }
-
-    for (const entry of entries) {
-      const fullPath = path.join(current, entry.name);
-      if (entry.isDirectory()) {
-        stack.push(fullPath);
-      } else if (entry.isFile() && /^rollout-.*\.jsonl$/.test(entry.name)) {
-        files.push(fullPath);
-      }
-    }
-  }
-
-  files.sort();
-  return files;
-}
-
-function readJsonlFile(filePath) {
-  try {
-    return fs.readFileSync(filePath, "utf8").split("\n");
-  } catch {
-    return [];
-  }
-}
-
-function sanitizeDelta(currentValue, previousValue) {
-  return Math.max(0, Number(currentValue || 0) - Number(previousValue || 0));
-}
-
-function normalizeUsageDelta(currentTotals, previousTotals) {
-  const inputTokens = sanitizeDelta(currentTotals.input_tokens, previousTotals?.input_tokens);
-  const cachedInputTokens = sanitizeDelta(currentTotals.cached_input_tokens, previousTotals?.cached_input_tokens);
-  const outputTokens = sanitizeDelta(currentTotals.output_tokens, previousTotals?.output_tokens);
-  const reasoningOutputTokens = sanitizeDelta(
-    currentTotals.reasoning_output_tokens,
-    previousTotals?.reasoning_output_tokens
-  );
-  const combinedOutputTokens = outputTokens + reasoningOutputTokens;
-  const totalTokens = inputTokens + combinedOutputTokens;
-
-  return {
-    inputTokens,
-    cachedInputTokens,
-    outputTokens: combinedOutputTokens,
-    rawOutputTokens: outputTokens,
-    reasoningOutputTokens,
-    totalTokens
-  };
-}
-
-function getModelRates(model) {
-  const normalized = String(model || "").toLowerCase();
-  return PRICING_BY_MODEL.find((profile) => profile.test(normalized)).rates;
-}
-
-function estimateCost(usage, model) {
-  const rates = getModelRates(model);
-  const inputTokens = Number(usage.inputTokens || 0);
-  const cachedInputTokens = Math.min(inputTokens, Number(usage.cachedInputTokens || 0));
-  const uncachedInputTokens = Math.max(0, inputTokens - cachedInputTokens);
-  const inputCost = (uncachedInputTokens / 1_000_000) * rates.input;
-  const cachedCost = (cachedInputTokens / 1_000_000) * rates.cached;
-  const outputCost = ((usage.outputTokens || 0) / 1_000_000) * rates.output;
-  return inputCost + cachedCost + outputCost;
-}
-
 function emptyBucket() {
   return {
     inputTokens: 0,
     cachedInputTokens: 0,
+    cacheReadTokens: 0,
+    cacheWriteTokens: 0,
     outputTokens: 0,
     totalTokens: 0,
     totalCost: 0
@@ -174,86 +68,47 @@ function emptyBucket() {
 }
 
 function accumulate(target, source) {
-  target.inputTokens += source.inputTokens;
-  target.cachedInputTokens += source.cachedInputTokens;
-  target.outputTokens += source.outputTokens;
-  target.totalTokens += source.totalTokens;
+  target.inputTokens += source.inputTokens || 0;
+  target.cachedInputTokens += source.cachedInputTokens || source.cacheReadTokens || 0;
+  target.cacheReadTokens += source.cacheReadTokens || 0;
+  target.cacheWriteTokens += source.cacheWriteTokens || 0;
+  target.outputTokens += source.outputTokens || 0;
+  target.totalTokens += source.totalTokens || 0;
   target.totalCost += source.totalCost || 0;
   return target;
 }
 
-function parseUsageTimeline(timezone) {
-  const files = listSessionFiles(SESSIONS_ROOT);
+function collectFromProviders(timezone) {
+  const providerResults = PROVIDERS.map((provider) => provider.collect());
   const events = [];
   const modelUsage = new Map();
   let latestTimestamp = 0;
 
-  for (const filePath of files) {
-    let previousTotals = null;
-    let currentModel = "unknown";
-    const lines = readJsonlFile(filePath);
+  for (const result of providerResults) {
+    for (const event of result.events) {
+      const date = new Date(event.timestampMs);
+      const enriched = {
+        ...event,
+        dateKey: getDateKey(date, timezone),
+        hourBucket: getHourBucket(date, timezone)
+      };
+      events.push(enriched);
+      latestTimestamp = Math.max(latestTimestamp, enriched.timestampMs);
 
-    for (const line of lines) {
-      if (!line.trim()) continue;
-
-      let entry;
-      try {
-        entry = JSON.parse(line);
-      } catch {
-        continue;
+      if (!modelUsage.has(enriched.model)) {
+        modelUsage.set(enriched.model, { ...emptyBucket(), provider: enriched.provider });
       }
-
-      if (entry.type === "turn_context" && entry.payload?.model) {
-        currentModel = entry.payload.model;
-      }
-
-      if (entry.type !== "event_msg" || entry.payload?.type !== "token_count" || !entry.payload?.info?.total_token_usage) {
-        continue;
-      }
-
-      const totals = entry.payload.info.total_token_usage;
-      const delta = normalizeUsageDelta(totals, previousTotals);
-      previousTotals = totals;
-
-      if (delta.totalTokens <= 0) continue;
-
-      const timestampMs = Date.parse(entry.timestamp || "");
-      if (!Number.isFinite(timestampMs)) continue;
-
-      latestTimestamp = Math.max(latestTimestamp, timestampMs);
-      events.push({
-        timestampMs,
-        dateKey: getDateKey(new Date(timestampMs), timezone),
-        hourBucket: getHourBucket(new Date(timestampMs), timezone),
-        model: currentModel,
-        ...delta,
-        totalCost: estimateCost(delta, currentModel)
-      });
-
-      if (!modelUsage.has(currentModel)) {
-        modelUsage.set(currentModel, emptyBucket());
-      }
-      accumulate(modelUsage.get(currentModel), {
-        ...delta,
-        totalCost: estimateCost(delta, currentModel)
-      });
+      accumulate(modelUsage.get(enriched.model), enriched);
     }
   }
 
-  return {
-    files,
-    events,
-    latestTimestamp,
-    modelUsage
-  };
+  return { providerResults, events, modelUsage, latestTimestamp };
 }
 
 function summarizeByDay(events) {
   const byDay = new Map();
   for (const event of events) {
-    if (!byDay.has(event.dateKey)) {
-      byDay.set(event.dateKey, emptyBucket());
-    }
+    if (!byDay.has(event.dateKey)) byDay.set(event.dateKey, emptyBucket());
     accumulate(byDay.get(event.dateKey), event);
   }
   return byDay;
@@ -263,6 +118,7 @@ function summarizeModelUsage(modelUsageMap) {
   return [...modelUsageMap.entries()]
     .map(([model, usage]) => ({
       model,
+      provider: usage.provider,
       totalTokens: usage.totalTokens,
       inputTokens: usage.inputTokens,
       cachedInputTokens: usage.cachedInputTokens,
@@ -275,35 +131,29 @@ function summarizeModelUsage(modelUsageMap) {
 
 function summarizeRange(byDay, dateKeys) {
   const total = emptyBucket();
-
   for (const key of dateKeys) {
     const bucket = byDay.get(key) || emptyBucket();
     accumulate(total, bucket);
   }
-
   return total;
 }
 
 function summarizeToday(events, todayKey) {
   const total = emptyBucket();
-
   for (const event of events) {
     if (event.dateKey !== todayKey) continue;
     accumulate(total, event);
   }
-
   return total;
 }
 
 function summarizeRangeFromEvents(events, dateKeys) {
   const total = emptyBucket();
   const dateKeySet = new Set(dateKeys);
-
   for (const event of events) {
     if (!dateKeySet.has(event.dateKey)) continue;
     accumulate(total, event);
   }
-
   return total;
 }
 
@@ -313,8 +163,7 @@ function percentDelta(currentValue, previousValue) {
 }
 
 function buildSummary(timezone = DEFAULT_TIMEZONE) {
-  const timeline = parseUsageTimeline(timezone);
-  const { events, files, latestTimestamp, modelUsage } = timeline;
+  const { providerResults, events, modelUsage, latestTimestamp } = collectFromProviders(timezone);
   const now = latestTimestamp ? new Date(latestTimestamp) : new Date();
   const todayKey = getDateKey(now, timezone);
   const trailing30 = getTrailingDateKeys(todayKey, 30);
@@ -330,13 +179,15 @@ function buildSummary(timezone = DEFAULT_TIMEZONE) {
   const thirtyDayCurrent = summarizeRangeFromEvents(events, trailing30);
   const thirtyDayPrevious = summarizeRange(byDay, previous30);
 
+  const codexResult = providerResults.find((result) => result.provider === codexProvider.PROVIDER_ID);
+
   return {
     generatedAt: new Date().toISOString(),
     latestEventAt: latestTimestamp ? new Date(latestTimestamp).toISOString() : null,
     timezone,
     dataSource: {
-      sessionsRoot: SESSIONS_ROOT,
-      fileCount: files.length,
+      sessionsRoot: codexResult?.root || codexProvider.SESSIONS_ROOT,
+      fileCount: codexResult?.fileCount || 0,
       eventCount: events.length
     },
     models: summarizeModelUsage(modelUsage),
