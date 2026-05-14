@@ -1,52 +1,47 @@
 # Token Lens
 
-> A tiny macOS lens for local Codex token usage: always available, visually quiet, and precise about cached-input cost.
+> A tiny macOS lens for local **Codex** and **Claude Code** token usage. Always on top, visually quiet, mouse-passthrough so it never blocks a click.
 
 ![Token Lens preview](assets/token-lens-preview.svg)
 
-Token Lens is a compact Electron widget that sits at the top center of macOS. It reads local Codex session logs, summarizes token usage across useful time windows, and estimates what the same traffic would cost under OpenAI API-style token pricing.
+Token Lens reads your local agent session logs and shows three numbers: how many tokens you used today, in the last 7 days, and in the last 30 days — plus an estimated USD cost based on each vendor's public API pricing.
 
-It is intentionally small: a 126px handle when collapsed, a fixed 420px panel when expanded, and mouse passthrough everywhere else so it does not block browser tabs or normal clicks.
+It is **not** a billing dashboard. It is a 420×190px Electron widget that lives in the macOS notch area and does one thing.
 
-## What It Shows
+## What you get
 
-| Window | Metric | Meaning |
+- **Today / 7d / 30d** token totals, merged across all providers in one view
+- **Estimated cost** in USD using public API rates (no provider switcher — everything is summed together)
+- **Cache-aware**: separates uncached input, cache writes, and cache reads at their actual prices
+- **Mouse passthrough**: a 126px handle peeks out of the menubar; only the handle and the expanded panel capture clicks
+- **Read-only**: no network calls, no telemetry, no auth. It only reads files you already have on disk
+
+## What it reads
+
+| Provider | Default path | What it parses |
 | --- | --- | --- |
-| Today | Tokens + estimated USD | Usage on the latest local Codex day |
-| 7 Days | Tokens + estimated USD | Rolling 7-day usage |
-| 30 Days | Tokens + estimated USD | Rolling 30-day usage |
+| Codex | `~/.codex/sessions/**/rollout-*.jsonl` | `event_msg / token_count` cumulative totals → per-turn deltas |
+| Claude Code | `~/.claude/projects/**/*.jsonl` | `type: "assistant"` rows with `message.usage` (per-call, no delta math) |
 
-The UI aggregates all models together and labels the dollar value as `API COST ESTIMATE`. It is not Codex billing, not ChatGPT credits, and not an invoice. It is a local estimate based on token counts saved in Codex session files.
+If neither directory exists, the panel just shows zeros — Token Lens won't fail.
 
-## Why It Exists
+## Pricing
 
-Codex sessions can be long, cached-heavy, and spread across many local projects. Token Lens gives a quick answer to three questions:
+USD per 1M tokens. Lives in [`electron/providers/pricing.js`](electron/providers/pricing.js).
 
-- How much local Codex usage happened recently?
-- How much of that input likely benefited from prompt caching?
-- What would the equivalent API cost look like under the configured API pricing table?
+**Claude (Anthropic public API, 5-minute cache rates):**
 
-## How It Works
+| Model | Input | Cache Write | Cache Read | Output |
+| --- | ---: | ---: | ---: | ---: |
+| Opus 4.5 / 4.6 / 4.7 | $5.00 | $6.25 | $0.50 | $25.00 |
+| Opus 4 / 4.1 | $15.00 | $18.75 | $1.50 | $75.00 |
+| Sonnet 4 / 4.5 / 4.6 | $3.00 | $3.75 | $0.30 | $15.00 |
+| Haiku 4.5 | $1.00 | $1.25 | $0.10 | $5.00 |
+| Haiku 3.5 | $0.80 | $1.00 | $0.08 | $4.00 |
 
-```mermaid
-flowchart LR
-  A["~/.codex/sessions"] --> B["rollout-*.jsonl files"]
-  B --> C["token_count events"]
-  C --> D["per-turn deltas"]
-  D --> E["cached vs uncached input"]
-  D --> F["output tokens"]
-  E --> G["API cost estimate"]
-  F --> G
-  G --> H["Today / 7 Days / 30 Days panel"]
-```
+**Codex (OpenAI):**
 
-The parser tracks cumulative token counters in each session file and converts them into deltas. Cached input tokens are treated as a subset of input tokens: cached input is charged at the cached rate, while the remaining input is charged at the normal input rate.
-
-## Pricing Assumptions
-
-Prices live in [electron/usageData.js](electron/usageData.js). Units are USD per 1M tokens.
-
-| Model | Input | Cached Input | Output |
+| Model | Input | Cached | Output |
 | --- | ---: | ---: | ---: |
 | GPT-5.5 | $5.00 | $0.50 | $30.00 |
 | GPT-5-Codex | $1.25 | $0.125 | $10.00 |
@@ -55,36 +50,27 @@ Prices live in [electron/usageData.js](electron/usageData.js). Units are USD per
 | GPT-5.3-Codex | $1.75 | $0.175 | $14.00 |
 | GPT-5.2 | $1.75 | $0.175 | $14.00 |
 
-Current limitations:
+**Not modeled:** long-context surcharges, regional uplifts (Anthropic `inference_geo`, Vertex/Bedrock regional), Batch API discount, Anthropic Fast mode, 1-hour cache writes (uses 5-minute as conservative default). Unknown Codex models fall back to GPT-5.4 pricing; unknown `claude-*` models fall back to Sonnet pricing.
 
-- It does not model long-context surcharges.
-- It does not model regional-processing uplifts.
-- Unknown model names fall back to GPT-5.4-style pricing.
+The dollar number is labeled `API COST ESTIMATE` for a reason — it's a local back-of-envelope, not an invoice.
 
-## Interaction Details
-
-- Collapsed state: only the top-center handle is interactive.
-- Expanded state: only the panel itself captures mouse input.
-- Transparent window regions use Electron mouse passthrough, so normal app and browser clicks keep working.
-- The refresh button re-reads local Codex sessions immediately.
-
-## Run
+## Run from source
 
 ```bash
 npm install
 npm start
 ```
 
-## Build
+You'll see a small handle at the top center of your primary display. Hover it to expand the panel.
+
+## Build a `.app`
 
 ```bash
-npm run pack:mac
-npm run dist:mac
+npm run pack:mac      # unsigned .app under dist/mac-arm64/
+npm run dist:mac      # .dmg installer under dist/
 ```
 
-Build outputs are written to `dist/`.
-
-## Install Locally
+Install locally:
 
 ```bash
 rm -rf "/Applications/Token Lens.app"
@@ -92,22 +78,67 @@ ditto "dist/mac-arm64/Token Lens.app" "/Applications/Token Lens.app"
 open -a "/Applications/Token Lens.app"
 ```
 
-## Project Map
+## Configuration
+
+| Env var | Effect |
+| --- | --- |
+| `TOKEN_LENS_CLAUDE_ROOT` | Override the Claude Code projects root. Useful if your `~/.claude` lives elsewhere. |
+
+## Verify
+
+Synthetic-data smoke tests, no external dependencies:
+
+```bash
+npm run verify:all              # all of the below
+npm run verify:claude-parser    # token + cost math against synthetic Claude session
+npm run verify:multi            # Codex + Claude flowing through the same buildSummary
+```
+
+## How it works
+
+```mermaid
+flowchart LR
+  A["~/.codex/sessions"]      --> P1["Codex provider"]
+  B["~/.claude/projects"]     --> P2["Claude provider"]
+  P1 --> M["merge events by timestamp"]
+  P2 --> M
+  M  --> R["Today / 7d / 30d rollups"]
+  M  --> C["estimateCost per model"]
+  R  --> U["panel UI"]
+  C  --> U
+```
+
+Each provider exposes a `collect()` that returns a stream of normalized usage events `{ timestampMs, model, inputTokens, cacheReadTokens, cacheWriteTokens, outputTokens, totalCost }`. `usageData.js` merges them, buckets by local-day, and produces the IPC payload the widget renders.
+
+Cache accounting:
+- **Codex** reports `cached_input_tokens` as a subset of `input_tokens` — uncached input billed at the input rate, cached portion at the cached rate.
+- **Claude** reports three separate populations: `input_tokens` (uncached), `cache_creation_input_tokens` (write, 1.25× input for 5-min cache), `cache_read_input_tokens` (hit, 0.10× input). All three are billed independently.
+
+## Project map
 
 | Path | Role |
 | --- | --- |
-| [electron/main.js](electron/main.js) | Window placement, always-on-top behavior, hover polling, mouse passthrough |
-| [electron/preload.js](electron/preload.js) | Safe bridge from renderer to Electron IPC |
-| [electron/usageData.js](electron/usageData.js) | Codex session parsing, cached-token-aware cost estimation |
-| [src/index.html](src/index.html) | Static widget markup |
-| [src/renderer.mjs](src/renderer.mjs) | Refresh logic and metric rendering |
-| [src/styles.css](src/styles.css) | Handle and panel styling |
-| [assets/token-lens-preview.svg](assets/token-lens-preview.svg) | README product preview |
+| [`electron/main.js`](electron/main.js) | Window placement, always-on-top, hover polling, mouse passthrough |
+| [`electron/preload.js`](electron/preload.js) | Safe IPC bridge to the renderer |
+| [`electron/usageData.js`](electron/usageData.js) | Multi-provider orchestration, time-window rollup, IPC payload |
+| [`electron/providers/pricing.js`](electron/providers/pricing.js) | Unified pricing table (Codex + Claude), four-tier cost estimator |
+| [`electron/providers/codex.js`](electron/providers/codex.js) | Codex `rollout-*.jsonl` parser, cumulative-to-delta conversion |
+| [`electron/providers/claudeCode.js`](electron/providers/claudeCode.js) | Claude Code `*.jsonl` parser, per-call usage |
+| [`src/index.html`](src/index.html), [`src/renderer.mjs`](src/renderer.mjs), [`src/styles.css`](src/styles.css) | Widget UI |
 
-## 中文说明
+## License
 
-Token Lens 是一个放在 macOS 顶部的小型 Codex token 监控组件。它读取本机 `~/.codex/sessions` 下的会话日志，统计 Today、7 Days、30 Days 三个时间窗口的 token 使用量，并按 OpenAI API 单价估算等价成本。
+MIT.
 
-它的重点不是做一个完整仪表盘，而是做一个不打扰工作的轻量提示器：收起时只露出一个小黑色把手；展开后显示三列核心数据；透明区域不会拦截鼠标点击。
+---
 
-成本数字是 `API COST ESTIMATE`：它不是 Codex 实际扣费，也不是 ChatGPT credits，只是把本地 session 里的 token 按 API token 单价折算成美元估算值。
+### 中文说明
+
+Token Lens 是一个放在 macOS 屏幕顶部的小型 token 用量监控组件，同时统计本地 **Codex**（`~/.codex/sessions`）和 **Claude Code**（`~/.claude/projects`）的 token 使用，按 OpenAI 与 Anthropic 公开 API 价格估算成本，合并展示在一个面板里——不区分 provider，看到的就是总数。
+
+特点：
+- 收起时只露出一个 126px 小把手，几乎不打扰；展开后是 420×190 的固定面板
+- 透明区域不拦截鼠标点击，正常工作时感觉不到它的存在
+- 完全只读本地文件，无网络请求、无遥测、无登录
+
+价格只是"估算"——不是 Codex/Claude 的实际账单，也不是订阅扣费，只是把本地 session 里的 token 数按 API 单价折算。

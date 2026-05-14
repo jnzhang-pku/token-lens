@@ -1,10 +1,13 @@
 {
   "name": "token-lens",
-  "version": "0.1.0",
-  "description": "Compact macOS notch-style token monitor for local Codex usage",
+  "version": "0.2.0",
+  "description": "Compact macOS notch-style token monitor for local Codex and Claude Code usage",
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
+    "verify:claude-parser": "node scripts/verify-claude-parser.js",
+    "verify:multi": "node scripts/verify-multi-provider.js",
+    "verify:all": "npm run verify:claude-parser && npm run verify:multi",
     "pack:mac": "electron-builder --mac dir",
     "dist:mac": "electron-builder --mac dmg"
   },

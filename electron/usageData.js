@@ -1,6 +1,7 @@
 const codexProvider = require("./providers/codex");
+const claudeCodeProvider = require("./providers/claudeCode");
 
-const PROVIDERS = [codexProvider];
+const PROVIDERS = [codexProvider, claudeCodeProvider];
 
 const DEFAULT_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
@@ -180,6 +181,7 @@ function buildSummary(timezone = DEFAULT_TIMEZONE) {
   const thirtyDayPrevious = summarizeRange(byDay, previous30);
 
   const codexResult = providerResults.find((result) => result.provider === codexProvider.PROVIDER_ID);
+  const totalFileCount = providerResults.reduce((sum, result) => sum + result.fileCount, 0);
 
   return {
     generatedAt: new Date().toISOString(),
@@ -187,8 +189,14 @@ function buildSummary(timezone = DEFAULT_TIMEZONE) {
     timezone,
     dataSource: {
       sessionsRoot: codexResult?.root || codexProvider.SESSIONS_ROOT,
-      fileCount: codexResult?.fileCount || 0,
-      eventCount: events.length
+      fileCount: totalFileCount,
+      eventCount: events.length,
+      providers: providerResults.map((result) => ({
+        provider: result.provider,
+        root: result.root,
+        fileCount: result.fileCount,
+        eventCount: result.events.length
+      }))
     },
     models: summarizeModelUsage(modelUsage),
     ranges: {
