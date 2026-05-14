@@ -1,5 +1,7 @@
 # Token Lens
 
+**English** · [中文](README.zh.md)
+
 > A tiny macOS lens for local **Codex** and **Claude Code** token usage. Always on top, visually quiet, mouse-passthrough so it never blocks a click.
 
 ![Token Lens preview](assets/token-lens-preview.svg)
@@ -129,16 +131,3 @@ Cache accounting:
 ## License
 
 MIT.
-
----
-
-### 中文说明
-
-Token Lens 是一个放在 macOS 屏幕顶部的小型 token 用量监控组件，同时统计本地 **Codex**（`~/.codex/sessions`）和 **Claude Code**（`~/.claude/projects`）的 token 使用，按 OpenAI 与 Anthropic 公开 API 价格估算成本，合并展示在一个面板里——不区分 provider，看到的就是总数。
-
-特点：
-- 收起时只露出一个 126px 小把手，几乎不打扰；展开后是 420×190 的固定面板
-- 透明区域不拦截鼠标点击，正常工作时感觉不到它的存在
-- 完全只读本地文件，无网络请求、无遥测、无登录
-
-价格只是"估算"——不是 Codex/Claude 的实际账单，也不是订阅扣费，只是把本地 session 里的 token 数按 API 单价折算。
