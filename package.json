@@ -1,7 +1,7 @@
 {
-  "name": "token-lens",
+  "name": "tokenfetti",
   "version": "0.2.0",
-  "description": "Compact macOS notch-style token monitor for local Codex and Claude Code usage",
+  "description": "A 420x190 macOS widget that turns local Codex / Claude Code session burn into a real-time dopamine scoreboard",
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
@@ -12,8 +12,8 @@
     "dist:mac": "electron-builder --mac dmg"
   },
   "build": {
-    "appId": "com.john.tokenlens",
-    "productName": "Token Lens",
+    "appId": "com.john.tokenfetti",
+    "productName": "Tokenfetti",
     "directories": {
       "output": "dist"
     },

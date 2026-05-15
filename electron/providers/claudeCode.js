@@ -13,7 +13,7 @@ function expandHome(inputPath) {
 }
 
 function getProjectsRoot() {
-  const override = process.env.TOKEN_LENS_CLAUDE_ROOT;
+  const override = process.env.TOKENFETTI_CLAUDE_ROOT;
   return override ? expandHome(override) : DEFAULT_PROJECTS_ROOT;
 }
 
@@ -96,6 +96,7 @@ function parseFile(filePath) {
       timestampMs,
       provider: PROVIDER_ID,
       model,
+      messageId: entry.message?.id || null,
       ...usageShape,
       cachedInputTokens: cacheRead,
       totalCost: estimateCost(usageShape, model)
@@ -108,7 +109,20 @@ function parseFile(filePath) {
 function collect() {
   const root = getProjectsRoot();
   const files = listSessionFiles(root);
-  const events = files.flatMap((filePath) => parseFile(filePath));
+  // Claude Code logs one row per content block (thinking, tool_use, text...)
+  // and every row carries the SAME message.usage payload. Dedup by message.id
+  // so a single API response is billed exactly once.
+  const seenMessageIds = new Set();
+  const events = [];
+  for (const filePath of files) {
+    for (const ev of parseFile(filePath)) {
+      if (ev.messageId) {
+        if (seenMessageIds.has(ev.messageId)) continue;
+        seenMessageIds.add(ev.messageId);
+      }
+      events.push(ev);
+    }
+  }
   return {
     provider: PROVIDER_ID,
     root,

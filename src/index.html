@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Token Lens</title>
+    <title>Tokenfetti</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -16,36 +16,56 @@
 
       <section class="panel" aria-label="Token usage summary">
         <header class="panel-header">
-          <span class="panel-title">TOKEN LENS</span>
+          <svg class="panel-logo" aria-hidden="true" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="9" cy="9" r="1.6" fill="#8b6cff"/>
+            <g transform="translate(9 9)">
+              <rect x="-1" y="-7" width="2" height="3" rx="0.5" fill="#a08aff"/>
+              <rect x="-1" y="-7" width="2" height="3" rx="0.5" fill="#ff7d9c" transform="rotate(60)"/>
+              <rect x="-1" y="-7" width="2" height="3" rx="0.5" fill="#ffd584" transform="rotate(120)"/>
+              <rect x="-1" y="-7" width="2" height="3" rx="0.5" fill="#ffb547" transform="rotate(180)"/>
+              <rect x="-1" y="-7" width="2" height="3" rx="0.5" fill="#ff8a55" transform="rotate(240)"/>
+              <rect x="-1" y="-7" width="2" height="3" rx="0.5" fill="#c97df5" transform="rotate(300)"/>
+            </g>
+          </svg>
+          <span class="panel-title"><span class="panel-title-token">token</span><span class="panel-title-fetti"><span>f</span><span>e</span><span>t</span><span>t</span><span>i</span></span></span>
           <span class="header-actions">
-            <span class="panel-model">ALL MODELS</span>
-            <button id="refresh-button" class="refresh-button" type="button" aria-label="Refresh usage">↻</button>
+            <button id="refresh-button" class="refresh-button" type="button" aria-label="Refresh usage"><span class="refresh-icon">↻</span></button>
           </span>
         </header>
 
         <section class="metrics-row">
-          <div class="metric-column">
+          <div class="metric-column" data-column-range="today">
             <div class="metric-label">TODAY</div>
-            <div class="metric-value" data-range="today" data-field="tokens">--</div>
-            <div class="metric-cost" data-range="today" data-field="cost">$--</div>
+            <div class="metric-value" data-range="today" data-field="cost">$--</div>
+            <div class="metric-cost" data-range="today" data-field="tokens">--</div>
           </div>
-          <div class="metric-column">
+          <div class="metric-column" data-column-range="7d">
             <div class="metric-label">7 DAYS</div>
-            <div class="metric-value" data-range="7d" data-field="tokens">--</div>
-            <div class="metric-cost" data-range="7d" data-field="cost">$--</div>
+            <div class="metric-value" data-range="7d" data-field="cost">$--</div>
+            <div class="metric-cost" data-range="7d" data-field="tokens">--</div>
           </div>
-          <div class="metric-column">
+          <div class="metric-column" data-column-range="30d">
             <div class="metric-label">30 DAYS</div>
-            <div class="metric-value" data-range="30d" data-field="tokens">--</div>
-            <div class="metric-cost" data-range="30d" data-field="cost">$--</div>
+            <div class="metric-value" data-range="30d" data-field="cost">$--</div>
+            <div class="metric-cost" data-range="30d" data-field="tokens">--</div>
           </div>
         </section>
 
-        <footer class="panel-footer">
-          <span>API COST ESTIMATE</span>
-          <span id="update-status">UPDATED NOW</span>
-        </footer>
+        <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true"></canvas>
       </section>
+
+      <div class="metric-tooltip" data-range="today" aria-hidden="true">
+        <div class="tt-row"><span class="tt-label">CODEX</span><span class="tt-value" data-provider="codex">$0</span></div>
+        <div class="tt-row"><span class="tt-label">CLAUDE</span><span class="tt-value" data-provider="claude-code">$0</span></div>
+      </div>
+      <div class="metric-tooltip" data-range="7d" aria-hidden="true">
+        <div class="tt-row"><span class="tt-label">CODEX</span><span class="tt-value" data-provider="codex">$0</span></div>
+        <div class="tt-row"><span class="tt-label">CLAUDE</span><span class="tt-value" data-provider="claude-code">$0</span></div>
+      </div>
+      <div class="metric-tooltip" data-range="30d" aria-hidden="true">
+        <div class="tt-row"><span class="tt-label">CODEX</span><span class="tt-value" data-provider="codex">$0</span></div>
+        <div class="tt-row"><span class="tt-label">CLAUDE</span><span class="tt-value" data-provider="claude-code">$0</span></div>
+      </div>
     </main>
     <script type="module" src="./renderer.mjs"></script>
   </body>

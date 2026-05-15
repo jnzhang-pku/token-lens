@@ -165,7 +165,7 @@ function percentDelta(currentValue, previousValue) {
 
 function buildSummary(timezone = DEFAULT_TIMEZONE) {
   const { providerResults, events, modelUsage, latestTimestamp } = collectFromProviders(timezone);
-  const now = latestTimestamp ? new Date(latestTimestamp) : new Date();
+  const now = new Date();
   const todayKey = getDateKey(now, timezone);
   const trailing30 = getTrailingDateKeys(todayKey, 30);
   const previous30 = getTrailingDateKeys(shiftDateKey(todayKey, -30), 30);
@@ -179,6 +179,21 @@ function buildSummary(timezone = DEFAULT_TIMEZONE) {
   const sevenDayPrevious = summarizeRange(byDay, previous7);
   const thirtyDayCurrent = summarizeRangeFromEvents(events, trailing30);
   const thirtyDayPrevious = summarizeRange(byDay, previous30);
+
+  const trailing7Set = new Set(trailing7);
+  const trailing30Set = new Set(trailing30);
+  function bucketByProvider(filterFn) {
+    const buckets = {};
+    for (const event of events) {
+      if (!filterFn(event)) continue;
+      if (!buckets[event.provider]) buckets[event.provider] = emptyBucket();
+      accumulate(buckets[event.provider], event);
+    }
+    return buckets;
+  }
+  const todayByProvider = bucketByProvider((e) => e.dateKey === todayKey);
+  const sevenDayByProvider = bucketByProvider((e) => trailing7Set.has(e.dateKey));
+  const thirtyDayByProvider = bucketByProvider((e) => trailing30Set.has(e.dateKey));
 
   const codexResult = providerResults.find((result) => result.provider === codexProvider.PROVIDER_ID);
   const totalFileCount = providerResults.reduce((sum, result) => sum + result.fileCount, 0);
@@ -208,7 +223,8 @@ function buildSummary(timezone = DEFAULT_TIMEZONE) {
         outputTokens: todayCurrent.outputTokens,
         totalTokens: todayCurrent.totalTokens,
         totalCost: todayCurrent.totalCost,
-        deltaPercent: percentDelta(todayCurrent.totalTokens, todayPrevious.totalTokens)
+        deltaPercent: percentDelta(todayCurrent.totalTokens, todayPrevious.totalTokens),
+        byProvider: todayByProvider
       },
       "7d": {
         key: "7d",
@@ -218,7 +234,8 @@ function buildSummary(timezone = DEFAULT_TIMEZONE) {
         outputTokens: sevenDayCurrent.outputTokens,
         totalTokens: sevenDayCurrent.totalTokens,
         totalCost: sevenDayCurrent.totalCost,
-        deltaPercent: percentDelta(sevenDayCurrent.totalTokens, sevenDayPrevious.totalTokens)
+        deltaPercent: percentDelta(sevenDayCurrent.totalTokens, sevenDayPrevious.totalTokens),
+        byProvider: sevenDayByProvider
       },
       "30d": {
         key: "30d",
@@ -228,7 +245,8 @@ function buildSummary(timezone = DEFAULT_TIMEZONE) {
         outputTokens: thirtyDayCurrent.outputTokens,
         totalTokens: thirtyDayCurrent.totalTokens,
         totalCost: thirtyDayCurrent.totalCost,
-        deltaPercent: percentDelta(thirtyDayCurrent.totalTokens, thirtyDayPrevious.totalTokens)
+        deltaPercent: percentDelta(thirtyDayCurrent.totalTokens, thirtyDayPrevious.totalTokens),
+        byProvider: thirtyDayByProvider
       }
     }
   };

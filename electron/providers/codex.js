@@ -54,15 +54,18 @@ function normalizeUsageDelta(currentTotals, previousTotals) {
     currentTotals.reasoning_output_tokens,
     previousTotals?.reasoning_output_tokens
   );
-  const combinedOutputTokens = outputTokens + reasoningOutputTokens;
+  // OpenAI convention: `output_tokens` already INCLUDES `reasoning_output_tokens`
+  // (verified empirically: every token_count event has total = input + output,
+  // never input + output + reasoning). Do not add reasoning separately or it
+  // double-counts at the output rate.
   return {
     inputTokens,
     cacheReadTokens,
     cacheWriteTokens: 0,
-    outputTokens: combinedOutputTokens,
+    outputTokens,
     rawOutputTokens: outputTokens,
     reasoningOutputTokens,
-    totalTokens: inputTokens + combinedOutputTokens
+    totalTokens: inputTokens + outputTokens
   };
 }
 

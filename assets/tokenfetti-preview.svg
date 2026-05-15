@@ -9,6 +9,10 @@
       <stop stop-color="#102010"/>
       <stop offset="1" stop-color="#192018"/>
     </linearGradient>
+    <linearGradient id="tokenMetal" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d8dee6"/>
+      <stop offset="100%" stop-color="#8d97a4"/>
+    </linearGradient>
     <filter id="panelShadow" x="134" y="90" width="1012" height="478" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="BackgroundImageFix"/>
       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
@@ -23,7 +27,7 @@
 
   <rect width="1280" height="720" rx="28" fill="url(#desktop)"/>
   <rect width="1280" height="76" fill="#20281E" fill-opacity="0.92"/>
-  <text x="34" y="48" fill="#F2F4EF" font-family="Arial, sans-serif" font-size="24" font-weight="700">Token Lens</text>
+  <text x="34" y="48" fill="#F2F4EF" font-family="Arial, sans-serif" font-size="24" font-weight="700">Tokenfetti</text>
   <text x="188" y="48" fill="#E7EBE2" font-family="Arial, sans-serif" font-size="19" font-weight="600">File</text>
   <text x="252" y="48" fill="#E7EBE2" font-family="Arial, sans-serif" font-size="19" font-weight="600">Edit</text>
   <text x="318" y="48" fill="#E7EBE2" font-family="Arial, sans-serif" font-size="19" font-weight="600">View</text>
@@ -39,31 +43,43 @@
   <circle cx="640" cy="48" r="5" fill="#8B6CFF"/>
 
   <g filter="url(#panelShadow)">
-    <rect x="220" y="148" width="840" height="336" rx="48" fill="#06080D"/>
-    <rect x="221" y="149" width="838" height="334" rx="47" stroke="#FFFFFF" stroke-opacity="0.1" stroke-width="2"/>
+    <rect x="220" y="148" width="840" height="336" rx="48" fill="#0F1320"/>
+    <rect x="221" y="149" width="838" height="334" rx="47" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="2"/>
 
-    <text x="270" y="214" fill="#F9FAFF" font-family="Arial, sans-serif" font-size="26" font-weight="700" letter-spacing="9">TOKEN LENS</text>
-    <text x="1010" y="214" text-anchor="end" fill="#AEB2BC" font-family="Arial, sans-serif" font-size="24" font-weight="700">ALL MODELS</text>
+    <!-- top-left: confetti-burst logo (radial 6 particles around violet center) -->
+    <g transform="translate(274 208)">
+      <circle r="3.2" fill="#8B6CFF"/>
+      <rect x="-2" y="-14" width="4" height="6" rx="1" fill="#A08AFF"/>
+      <rect x="-2" y="-14" width="4" height="6" rx="1" fill="#FF7D9C" transform="rotate(60)"/>
+      <rect x="-2" y="-14" width="4" height="6" rx="1" fill="#FFD584" transform="rotate(120)"/>
+      <rect x="-2" y="-14" width="4" height="6" rx="1" fill="#FFB547" transform="rotate(180)"/>
+      <rect x="-2" y="-14" width="4" height="6" rx="1" fill="#FF8A55" transform="rotate(240)"/>
+      <rect x="-2" y="-14" width="4" height="6" rx="1" fill="#C97DF5" transform="rotate(300)"/>
+    </g>
+
+    <!-- title centered in panel header -->
+    <text x="640" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" letter-spacing="1.6"><tspan fill="url(#tokenMetal)" font-weight="500">token</tspan><tspan fill="#8B6CFF" font-weight="800">f</tspan><tspan fill="#FF7D9C" font-weight="800">e</tspan><tspan fill="#FFD584" font-weight="800">t</tspan><tspan fill="#A08AFF" font-weight="800">t</tspan><tspan fill="#FFB547" font-weight="800">i</tspan></text>
+
+    <!-- top-right: refresh button -->
+    <circle cx="1006" cy="208" r="16" fill="rgba(255,255,255,0.04)" stroke="#FFFFFF" stroke-opacity="0.10" stroke-width="1.5"/>
+    <text x="1006" y="216" text-anchor="middle" fill="#AEB2BC" font-family="Arial, sans-serif" font-size="22" font-weight="500">↻</text>
 
     <line x1="516" y1="276" x2="516" y2="406" stroke="#FFFFFF" stroke-opacity="0.09" stroke-width="2"/>
     <line x1="764" y1="276" x2="764" y2="406" stroke="#FFFFFF" stroke-opacity="0.09" stroke-width="2"/>
 
     <text x="270" y="296" fill="#8E929D" font-family="Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="7">TODAY</text>
-    <text x="270" y="367" fill="#F9FAFF" font-family="Arial, sans-serif" font-size="66" font-weight="700">53.85M</text>
-    <text x="270" y="420" fill="#A8ACB5" font-family="Arial, sans-serif" font-size="32" font-weight="500">$134.07</text>
+    <text x="270" y="367" fill="#C97DF5" font-family="Arial, sans-serif" font-size="66" font-weight="700">$134</text>
+    <text x="270" y="420" fill="#A8ACB5" font-family="Arial, sans-serif" font-size="28" font-weight="500">53.85M</text>
 
     <text x="564" y="296" fill="#8E929D" font-family="Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="7">7 DAYS</text>
-    <text x="564" y="367" fill="#F9FAFF" font-family="Arial, sans-serif" font-size="66" font-weight="700">279M</text>
-    <text x="564" y="420" fill="#A8ACB5" font-family="Arial, sans-serif" font-size="32" font-weight="500">$459.79</text>
+    <text x="564" y="367" fill="#FF7D9C" font-family="Arial, sans-serif" font-size="66" font-weight="700">$460</text>
+    <text x="564" y="420" fill="#A8ACB5" font-family="Arial, sans-serif" font-size="28" font-weight="500">279M</text>
 
     <text x="812" y="296" fill="#8E929D" font-family="Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="7">30 DAYS</text>
-    <text x="812" y="367" fill="#F9FAFF" font-family="Arial, sans-serif" font-size="66" font-weight="700">1.53B</text>
-    <text x="812" y="420" fill="#A8ACB5" font-family="Arial, sans-serif" font-size="32" font-weight="500">$2,348.13</text>
-
-    <text x="270" y="456" fill="#6F7480" font-family="Arial, sans-serif" font-size="17" font-weight="800" letter-spacing="5">API COST ESTIMATE</text>
-    <text x="1010" y="456" text-anchor="end" fill="#6F7480" font-family="Arial, sans-serif" font-size="17" font-weight="800" letter-spacing="5">UPDATED NOW</text>
+    <text x="812" y="367" fill="#FFB547" font-family="Arial, sans-serif" font-size="66" font-weight="700">$2.3K</text>
+    <text x="812" y="420" fill="#A8ACB5" font-family="Arial, sans-serif" font-size="28" font-weight="500">1.53B</text>
   </g>
 
-  <text x="220" y="570" fill="#F5F6FA" font-family="Arial, sans-serif" font-size="36" font-weight="800">A small macOS panel for local Codex token usage.</text>
-  <text x="220" y="616" fill="#C7CBD4" font-family="Arial, sans-serif" font-size="21" font-weight="500">Aggregates all models and estimates cached-token-aware API cost from local Codex logs.</text>
+  <text x="220" y="570" fill="#F5F6FA" font-family="Arial, sans-serif" font-size="36" font-weight="800">Local Codex + Claude Code burn, made visceral.</text>
+  <text x="220" y="616" fill="#C7CBD4" font-family="Arial, sans-serif" font-size="21" font-weight="500">Cool→warm cost ladder, panel-bound confetti on milestones, hover for per-provider breakdown.</text>
 </svg>

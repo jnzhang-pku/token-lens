@@ -1,5 +1,5 @@
 // Verifies that Codex + Claude events flow through the same buildSummary
-// and produce a merged today/7d/30d view. Uses TOKEN_LENS_CLAUDE_ROOT for
+// and produce a merged today/7d/30d view. Uses TOKENFETTI_CLAUDE_ROOT for
 // the Claude side; Codex side runs against real ~/.codex/sessions, so this
 // asserts only on per-provider stats and the Claude side.
 
@@ -7,7 +7,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
-const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "token-lens-multi-"));
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "tokenfetti-multi-"));
 const claudeRoot = path.join(tmpDir, "projects", "-Users-test-app");
 fs.mkdirSync(claudeRoot, { recursive: true });
 
@@ -27,7 +27,7 @@ fs.writeFileSync(
   })}\n`
 );
 
-process.env.TOKEN_LENS_CLAUDE_ROOT = path.join(tmpDir, "projects");
+process.env.TOKENFETTI_CLAUDE_ROOT = path.join(tmpDir, "projects");
 
 const { buildSummary } = require("../electron/usageData");
 const summary = buildSummary("UTC");

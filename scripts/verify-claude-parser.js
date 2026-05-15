@@ -5,7 +5,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
-const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "token-lens-claude-parser-"));
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "tokenfetti-claude-parser-"));
 const claudeRoot = path.join(tmpDir, "projects", "-Users-test-app");
 fs.mkdirSync(claudeRoot, { recursive: true });
 
@@ -40,7 +40,7 @@ const rows = [
 
 fs.writeFileSync(filePath, `${rows.map((row) => JSON.stringify(row)).join("\n")}\n`);
 
-process.env.TOKEN_LENS_CLAUDE_ROOT = path.join(tmpDir, "projects");
+process.env.TOKENFETTI_CLAUDE_ROOT = path.join(tmpDir, "projects");
 
 const { buildSummary } = require("../electron/usageData");
 const summary = buildSummary("UTC");

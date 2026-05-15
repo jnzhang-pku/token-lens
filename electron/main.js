@@ -2,15 +2,24 @@ const path = require("path");
 const { app, BrowserWindow, ipcMain, screen } = require("electron");
 const { buildSummary } = require("./usageData");
 
-app.setName("Token Lens");
+app.setName("Tokenfetti");
 
-const WINDOW_WIDTH = 420;
-const WINDOW_HEIGHT = 190;
-const HANDLE_HEIGHT = 10;
-const HANDLE_WIDTH = 126;
+// The window is wider than the panel — the right portion is reserved as
+// transparent space where the rightmost column's hover tooltip can render
+// past the panel edge. The panel itself stays PANEL_WIDTH wide and is
+// centered under the macOS notch.
+const WINDOW_WIDTH = 560;
+const WINDOW_HEIGHT = 172;
+const PANEL_WIDTH = 420;
+// Handle is sized to sit inside the macOS camera-housing notch.
+// 14" MacBook Pro notch ~= 218pt wide, 16" ~= 244pt. We use 85% of 14" so it
+// fits comfortably under the notch on both. If you only ever use a 16",
+// bump HANDLE_WIDTH to 207 (= 244 * 0.85). Keep CSS (.handle) in sync.
+const HANDLE_WIDTH = 185;
+const HANDLE_HEIGHT = 24;
 const HOVER_PADDING = 6;
 const PANEL_TOP = 18;
-const PANEL_HEIGHT = 168;
+const PANEL_HEIGHT = 150;
 const CLOSE_DELAY_MS = 350;
 const CURSOR_POLL_MS = 50;
 
@@ -30,7 +39,9 @@ function getTopCenterBounds() {
     menuBarHeight > HANDLE_HEIGHT ? bounds.y + Math.round((menuBarHeight - HANDLE_HEIGHT) / 2) : workArea.y;
 
   return {
-    x: Math.round(screenCenterX - WINDOW_WIDTH / 2),
+    // Center the PANEL (not the window) under the notch — the window extends
+    // farther to the right to host the side popover.
+    x: Math.round(screenCenterX - PANEL_WIDTH / 2),
     y: centeredMenuBarY,
     width: WINDOW_WIDTH,
     height: WINDOW_HEIGHT
@@ -48,7 +59,9 @@ function pointInRect(point, rect) {
 
 function getHandleRect(bounds) {
   return {
-    x: bounds.x + Math.round((WINDOW_WIDTH - HANDLE_WIDTH) / 2) - HOVER_PADDING,
+    // Handle is centered on the PANEL (which is left-aligned in the window),
+    // so it sits under the notch.
+    x: bounds.x + Math.round((PANEL_WIDTH - HANDLE_WIDTH) / 2) - HOVER_PADDING,
     y: bounds.y - HOVER_PADDING,
     width: HANDLE_WIDTH + HOVER_PADDING * 2,
     height: HANDLE_HEIGHT + HOVER_PADDING * 2
@@ -59,7 +72,18 @@ function getPanelRect(bounds) {
   return {
     x: bounds.x,
     y: bounds.y + PANEL_TOP,
-    width: WINDOW_WIDTH,
+    width: PANEL_WIDTH,
+    height: PANEL_HEIGHT
+  };
+}
+
+// Right-side area that hosts the hover popover. Cursor over this region keeps
+// the panel open (so users can move toward the popover without it closing).
+function getSidePopoverRect(bounds) {
+  return {
+    x: bounds.x + PANEL_WIDTH,
+    y: bounds.y + PANEL_TOP,
+    width: WINDOW_WIDTH - PANEL_WIDTH,
     height: PANEL_HEIGHT
   };
 }
@@ -73,7 +97,7 @@ function setMouseEventsIgnored(nextIgnored) {
 function sendOpenState(nextOpen) {
   if (!widgetWindow || widgetWindow.isDestroyed() || panelOpen === nextOpen) return;
   panelOpen = nextOpen;
-  widgetWindow.webContents.send("token-lens:open-state", nextOpen);
+  widgetWindow.webContents.send("tokenfetti:open-state", nextOpen);
 }
 
 function scheduleClose() {
@@ -97,11 +121,14 @@ function updatePointerState() {
   const bounds = widgetWindow.getBounds();
   const overHandle = pointInRect(point, getHandleRect(bounds));
   const overPanel = pointInRect(point, getPanelRect(bounds));
+  const overSide = panelOpen && pointInRect(point, getSidePopoverRect(bounds));
+  // We capture mouse only over the panel/handle. The side area stays
+  // passthrough so clicks fall through, but it still keeps panel open.
   const shouldOwnMouse = panelOpen ? overPanel || overHandle : overHandle;
 
   setMouseEventsIgnored(!shouldOwnMouse);
 
-  if (overHandle || (panelOpen && overPanel)) {
+  if (overHandle || (panelOpen && (overPanel || overSide))) {
     cancelClose();
     sendOpenState(true);
     return;
@@ -120,7 +147,7 @@ function startCursorPolling() {
 function createMainWindow() {
   widgetWindow = new BrowserWindow({
     ...getTopCenterBounds(),
-    title: "Token Lens",
+    title: "Tokenfetti",
     transparent: true,
     frame: false,
     hasShadow: false,
@@ -172,7 +199,7 @@ app.whenReady().then(() => {
 
   createMainWindow();
 
-  ipcMain.handle("token-lens:get-usage-summary", async () => buildSummary());
+  ipcMain.handle("tokenfetti:get-usage-summary", async () => buildSummary());
 
   app.on("activate", () => {
     if (!widgetWindow || widgetWindow.isDestroyed()) {
