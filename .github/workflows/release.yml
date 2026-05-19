@@ -31,12 +31,9 @@ jobs:
         run: npm run verify:all
 
       - name: Build .dmg (arm64, ad-hoc signed)
-        run: npm run dist:mac
-        env:
-          # electron-builder still tries to read these but we don't
-          # have them; setting empty avoids accidental real signing.
-          CSC_LINK: ""
-          CSC_KEY_PASSWORD: ""
+        # --publish never disables electron-builder's implicit CI
+        # auto-publish (we upload via gh release upload below).
+        run: npx electron-builder --mac dmg --publish never
 
       - name: Show artifacts
         run: ls -la dist/
