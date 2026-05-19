@@ -1,0 +1,48 @@
+name: Build and upload macOS DMG
+
+# Triggered manually so we control when a build runs (electron-builder
+# pulls a lot from npm + Electron, costs CI minutes). Default target
+# tag matches the existing release we want to attach the dmg to.
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag to upload to (e.g. v0.2.0)"
+        required: true
+        default: "v0.2.0"
+
+permissions:
+  contents: write
+
+jobs:
+  build-mac-arm64:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install deps
+        run: npm install
+
+      - name: Verify parsers
+        run: npm run verify:all
+
+      - name: Build .dmg (arm64, ad-hoc signed)
+        run: npm run dist:mac
+        env:
+          # electron-builder still tries to read these but we don't
+          # have them; setting empty avoids accidental real signing.
+          CSC_LINK: ""
+          CSC_KEY_PASSWORD: ""
+
+      - name: Show artifacts
+        run: ls -la dist/
+
+      - name: Upload .dmg to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ inputs.release_tag }}" dist/*.dmg --clobber
